@@ -1,5 +1,8 @@
 import { Component } from 'react';
-import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { v4 as uuidv4 } from 'uuid';
+
+import * as contactsAction from '../../redux/contacts/contacts-actions';
 
 export class ContactForm extends Component {
   state = {
@@ -7,9 +10,14 @@ export class ContactForm extends Component {
     number: '',
   };
 
-  submitHandler = (e) => {
-    e.preventDefault();
-    this.props.addContactHandler({ ...this.state });
+  addContact = (newContact) => {
+    if (this.props.contacts.find((contact) => contact.name === newContact.name)) {
+      alert(`${newContact.name} is already in contacts.`);
+      return;
+    }
+    newContact.id = uuidv4();
+    this.props.onAddContact(newContact);
+
     this.setState({ name: '', number: '' });
   };
 
@@ -19,7 +27,13 @@ export class ContactForm extends Component {
 
   render() {
     return (
-      <form className="contact-form" onSubmit={(e) => this.submitHandler(e)}>
+      <form
+        className="contact-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          this.addContact({ ...this.state });
+        }}
+      >
         <div className="form-container">
           <label className="form-label">
             Name
@@ -56,6 +70,12 @@ export class ContactForm extends Component {
   }
 }
 
-ContactForm.propTypes = {
-  addContactHandler: PropTypes.func,
-};
+const mapStateToProps = ({ contacts: { items } }) => ({
+  contacts: items,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  onAddContact: (contact) => dispatch(contactsAction.addContact(contact)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(ContactForm);

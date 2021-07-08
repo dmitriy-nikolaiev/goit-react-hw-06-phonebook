@@ -1,30 +1,34 @@
-import { Component } from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
-import { ContactListItem } from '../ContactListItem';
+import * as contactsAction from '../../redux/contacts/contacts-actions';
+import ContactListItem from '../ContactListItem';
 
-export class ContactList extends Component {
-  render() {
-    return (
-      <ul className="contact-list">
-        {this.props.contacts
-          .filter((contact) =>
-            contact.name.toLowerCase().includes(this.props.filter.toLowerCase().trim())
-          )
-          .map((contact) => {
-            return (
-              <ContactListItem
-                key={contact.id}
-                name={contact.name}
-                number={contact.number}
-                deleteHandler={this.props.deleteHandler(contact.id)}
-              />
-            );
-          })}
-      </ul>
-    );
-  }
-}
+const ContactList = ({ contacts, filter, onDeleteContact }) => (
+  <ul className="contact-list">
+    {contacts
+      .filter((contact) => contact.name.toLowerCase().includes(filter.toLowerCase().trim()))
+      .map((contact) => {
+        return (
+          <ContactListItem
+            key={contact.id}
+            name={contact.name}
+            number={contact.number}
+            onDelete={() => onDeleteContact(contact.id)}
+          />
+        );
+      })}
+  </ul>
+);
+
+const mapStateToProps = ({ contacts: { items, filter } }) => ({
+  contacts: items,
+  filter: filter,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  onDeleteContact: (id) => dispatch(contactsAction.deleteContact(id)),
+});
 
 ContactList.defaultProps = {
   filter: '',
@@ -34,3 +38,5 @@ ContactList.propTypes = {
   filter: PropTypes.string,
   contacts: PropTypes.array.isRequired,
 };
+
+export default connect(mapStateToProps, mapDispatchToProps)(ContactList);
