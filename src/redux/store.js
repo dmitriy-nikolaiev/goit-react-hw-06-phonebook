@@ -7,8 +7,8 @@ const store = configureStore({
     contacts: contactsReducer,
   },
 });
+
 const saveState = (state) => {
-  console.log(state, 'Save state');
   try {
     localStorage.setItem('contacts', JSON.stringify(state.contacts.items));
   } catch (error) {}
